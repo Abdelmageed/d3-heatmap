@@ -2,6 +2,9 @@ import * as d3 from 'd3'
 import tip from 'd3-tip'
 import * as chrom from 'd3-scale-chromatic'
 
+const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
 const dataUrl = 'https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/global-temperature.json'
 const chart = () => {
     d3.json(dataUrl, (data) => {
@@ -11,24 +14,78 @@ const chart = () => {
 
 const drawHeatMap = (data) => {
     
+    const container = {
+        width: 960, height: 600
+    }
+    const margin = {
+        top: 50, right: 55, bottom: 50, left: 75
+    }
+    const chartWidth = container.width - margin.right - margin.left,
+          chartHeight = container.height - margin.top - margin.bottom
+    
+    let svg = d3.select('body').append('svg')
+        .attr('width', container.width)
+        .attr('height', container.height)
+    let chart = svg
+        .append('g')
+        .attr('width', chartWidth)
+        .attr('height', chartHeight)
+        .attr('transform', `translate(${margin.left},${margin.top})`)
+    
     let baseTemp = data.baseTemperature,
         points = data.monthlyVariance
+    
     //x
-    console.log (chrom.interpolateRdBu)
-    let x = d3.scaleSequential()
+    
+    let x = d3.scaleTime()
+        .domain(d3.extent(points,(d=>+d.year)).map(d=>new Date(d, 0)))
+        .rangeRound([0, chartWidth])
+    
+    //y
+    let y = d3.scalePoint()
+        .domain(monthNames)
+        .range([chartHeight, 0])
+        
+    //z
+    let z = d3.scaleSequential()
         .interpolator(ineterpolateBuRd)
         .domain(d3.extent(points,(d=>d.variance + baseTemp)))
     
-//        console.log(d3.extent(points,(d=>d.variance + baseTemp)));
-    d3.select('body').append('svg')
-        .attr('width', 960)
-        .attr('height', 600)
-        .append('rect')
-        .attr('width', 50)
-        .attr('height', 50)
-        .attr('fill', x(2))
-
-//    console.log(x(12));
+    let xAxis = d3.axisBottom(x)
+        .ticks(d3.timeYear.every(25)),
+        yAxis = d3.axisLeft(y)
+//    console.log(x(new Date(1800, 0)))
+    chart.append('g')
+        .attr('transform', `translate(0,${chartHeight})`)
+        .call(xAxis)
+    chart.append('g')
+        .call(yAxis)
+    
+    chart.append('text')
+        .attr('x', chartWidth + 20)
+        .attr('text-anchor', 'middle')
+        .attr('y', chartHeight / 2 - 70)
+        .text('Variance')
+    
+    //legend
+    let legend = chart
+        .append('g')
+        .selectAll('.legend')
+        .data(z.ticks(6).slice(1).reverse()).enter()
+        .append('g')
+        .attr("class", "legend")
+        .attr("transform", (d,i)=>`translate(${chartWidth},${chartHeight / 2 - 50 + i*20})`)
+    
+    legend.append('rect')
+        .attr('width', 10)
+        .attr('height', 20)
+        .style('fill', z)
+    
+    legend.append('text')
+        .attr('x', 20)
+        .attr('y', 10)
+        .attr('dy', 5)
+        .text(String)
 }
 
 const ineterpolateBuRd = t => {
@@ -58,7 +115,6 @@ const ineterpolateBuRd = t => {
     return `rgb(${parseInt(col.r)}, ${parseInt(col.g)}, ${parseInt(col.b)})`
 }
 const lerpColor = (c1, c2, t) => {
-//     console.log(c1,c2,t)
      return{
     r: lerp(c1.r, c2.r, t),
     g: lerp(c1.g, c2.g, t),
@@ -66,7 +122,6 @@ const lerpColor = (c1, c2, t) => {
    
 }
 const lerp = (v0, v1, t) => {
-//    console.log((1 - t) * v0 + t * v1)
     return (1 - t) * v0 + t * v1
 }
 export default chart
