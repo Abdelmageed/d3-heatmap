@@ -1,0 +1,45 @@
+{
+  "name": "d3-heatmap",
+  "version": "1.0.0",
+  "description": "FreeCodeCamp - Data Visualization Challenges (3)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --watch webpack.config.js --exec \"webpack-dev-server --env development\"",
+    "build": "webpack --env production",
+    "deploy": "gh-pages -d build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abdelmageed/d3-heatmap.git"
+  },
+  "keywords": [
+    "d3",
+    "node",
+    "webpack"
+  ],
+  "author": "Abdelmageed Sayed",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Abdelmageed/d3-heatmap/issues"
+  },
+  "homepage": "https://github.com/Abdelmageed/d3-heatmap#readme",
+  "devDependencies": {
+    "babel-core": "^6.22.1",
+    "babel-loader": "^6.2.10",
+    "babel-preset-es2015": "^6.22.0",
+    "css-loader": "^0.26.1",
+    "html-webpack-plugin": "^2.26.0",
+    "nodemon": "^1.11.0",
+    "style-loader": "^0.13.1",
+    "webpack": "^2.2.0",
+    "webpack-dev-server": "^2.2.0",
+    "webpack-merge": "^2.4.0"
+  },
+  "dependencies": {
+    "d3": "^4.4.4",
+    "d3-scale-chromatic": "^1.1.0",
+    "d3-tip": "^0.7.1",
+    "gh-pages": "^0.12.0"
+  }
+}
