@@ -18,7 +18,7 @@ const drawHeatMap = (data) => {
         width: 960, height: 600
     }
     const margin = {
-        top: 50, right: 55, bottom: 50, left: 75
+        top: 80, right: 75, bottom: 80, left: 100
     }
     const chartWidth = container.width - margin.right - margin.left,
           chartHeight = container.height - margin.top - margin.bottom
@@ -90,7 +90,7 @@ const drawHeatMap = (data) => {
         .call(yAxis)
     
     chart.append('text')
-        .attr('x', chartWidth + 30)
+        .attr('x', chartWidth + 40)
         .attr('text-anchor', 'middle')
         .attr('y', chartHeight / 2 - 65)
         .text('Temp')
@@ -102,7 +102,7 @@ const drawHeatMap = (data) => {
         .data(z.ticks(6).slice(1).reverse()).enter()
         .append('g')
         .attr("class", "legend")
-        .attr("transform", (d,i)=>`translate(${chartWidth + 10},${chartHeight / 2 - 50 + i*20})`)
+        .attr("transform", (d,i)=>`translate(${chartWidth + 20},${chartHeight / 2 - 50 + i*20})`)
     
     legend.append('rect')
         .attr('width', 10)
@@ -115,7 +115,6 @@ const drawHeatMap = (data) => {
         .attr('dy', 5)
         .text(String)
     
-    console.log(y(monthNames[0]))
     //data points
     chart.selectAll('.tile')
         .data(points).enter()
@@ -128,6 +127,36 @@ const drawHeatMap = (data) => {
         .attr('height', boxHeight)
         .on('mouseover', tooltip.show)
         .on('mouseout')
+    
+    //labels
+    chart.append('text')
+        .text('Monthly Global Land-Surface Temperature')
+        .attr('text-anchor', 'middle')
+        .attr('x', chartWidth/2)
+        .attr('y', -margin.top/2)
+        .style('font-size', 25)
+    
+    chart.append('text')
+        .text('1753-2015')
+        .attr('text-anchor', 'middle')
+        .attr('x', chartWidth/2)
+        .attr('y', -margin.top/4)
+        .style('font-size', 20)
+    
+    chart.append('text')
+        .text('Months')
+        .attr('transform', 'rotate(-90)')
+        .attr('text-anchor', 'middle')
+        .attr('x', -chartHeight / 2)
+        .attr('y', -margin.right)
+        .style('font-size', 18)
+    
+    chart.append('text')
+        .text('Years')
+        .attr('text-anchor', 'middle')
+        .attr('x', chartWidth/2)
+        .attr('y', chartHeight + margin.bottom - 20)
+        .style('font-size', 18)
 }
 
 const ineterpolateBuRd = t => {
