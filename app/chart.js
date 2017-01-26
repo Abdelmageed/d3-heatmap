@@ -50,8 +50,6 @@ const drawHeatMap = (data) => {
     let y = d3.scalePoint()
         .domain(monthNames)
         .range([chartHeight, 0])
-    //extend y domain by 1 step, to have tiles bottom left corner adjacent to tick
-//    y.domain(y.domain()[0], y.domain()[1])
         
     //z
     let z = d3.scaleSequential()
@@ -66,7 +64,25 @@ const drawHeatMap = (data) => {
         followingYear = new Date(yearRange[0] + 1, 0)
      let boxWidth =  x(followingYear) - x(startYear),
         boxHeight = y(monthNames[0]) - y(monthNames[1])
-//    console.log(x(new Date(1800, 0)))
+     
+     //tooltip
+     const tooltip = tip().html(d=>`
+            <div class="tooltip">
+                <strong>
+                    ${d.year}, ${monthNames[d.month-1]}
+                </strong>
+                <br>
+                <span>
+                    ${d3.format('.2f')(d.variance+ baseTemp)}C&deg;
+                </span>
+                <br>
+                <span>
+                    ${d3.format('.2f')(d.variance)}C&deg;
+                </span>
+            </div>
+`)
+     chart.call(tooltip)
+     
     chart.append('g')
         .attr('transform', `translate(0,${chartHeight})`)
         .call(xAxis)
@@ -110,6 +126,8 @@ const drawHeatMap = (data) => {
         .style('fill', d=>z(d.variance + baseTemp))
         .attr('width', boxWidth)
         .attr('height', boxHeight)
+        .on('mouseover', tooltip.show)
+        .on('mouseout')
 }
 
 const ineterpolateBuRd = t => {
