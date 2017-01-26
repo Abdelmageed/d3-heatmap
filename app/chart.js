@@ -3,7 +3,7 @@ import tip from 'd3-tip'
 import * as chrom from 'd3-scale-chromatic'
 
 const monthNames = ["January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
+  "July", "August", "September", "October", "November", "December", ""
 ];
 const dataUrl = 'https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/global-temperature.json'
 const chart = () => {
@@ -23,6 +23,13 @@ const drawHeatMap = (data) => {
     const chartWidth = container.width - margin.right - margin.left,
           chartHeight = container.height - margin.top - margin.bottom
     
+    let baseTemp = data.baseTemperature,
+        points = data.monthlyVariance
+    
+    let yearRange = d3.extent(points,(d=>+d.year))
+    
+   
+    
     let svg = d3.select('body').append('svg')
         .attr('width', container.width)
         .attr('height', container.height)
@@ -32,19 +39,19 @@ const drawHeatMap = (data) => {
         .attr('height', chartHeight)
         .attr('transform', `translate(${margin.left},${margin.top})`)
     
-    let baseTemp = data.baseTemperature,
-        points = data.monthlyVariance
+    
     
     //x
-    
     let x = d3.scaleTime()
-        .domain(d3.extent(points,(d=>+d.year)).map(d=>new Date(d, 0)))
-        .rangeRound([0, chartWidth])
+        .domain(yearRange.map(d=>new Date(d, 0)))
+        .range([0, chartWidth])
     
     //y
     let y = d3.scalePoint()
         .domain(monthNames)
         .range([chartHeight, 0])
+    //extend y domain by 1 step, to have tiles bottom left corner adjacent to tick
+//    y.domain(y.domain()[0], y.domain()[1])
         
     //z
     let z = d3.scaleSequential()
@@ -54,6 +61,11 @@ const drawHeatMap = (data) => {
     let xAxis = d3.axisBottom(x)
         .ticks(d3.timeYear.every(25)),
         yAxis = d3.axisLeft(y)
+    
+    let startYear = new Date(yearRange[0], 0),
+        followingYear = new Date(yearRange[0] + 1, 0)
+     let boxWidth =  x(followingYear) - x(startYear),
+        boxHeight = y(monthNames[0]) - y(monthNames[1])
 //    console.log(x(new Date(1800, 0)))
     chart.append('g')
         .attr('transform', `translate(0,${chartHeight})`)
@@ -62,10 +74,10 @@ const drawHeatMap = (data) => {
         .call(yAxis)
     
     chart.append('text')
-        .attr('x', chartWidth + 20)
+        .attr('x', chartWidth + 30)
         .attr('text-anchor', 'middle')
-        .attr('y', chartHeight / 2 - 70)
-        .text('Variance')
+        .attr('y', chartHeight / 2 - 65)
+        .text('Temp')
     
     //legend
     let legend = chart
@@ -74,7 +86,7 @@ const drawHeatMap = (data) => {
         .data(z.ticks(6).slice(1).reverse()).enter()
         .append('g')
         .attr("class", "legend")
-        .attr("transform", (d,i)=>`translate(${chartWidth},${chartHeight / 2 - 50 + i*20})`)
+        .attr("transform", (d,i)=>`translate(${chartWidth + 10},${chartHeight / 2 - 50 + i*20})`)
     
     legend.append('rect')
         .attr('width', 10)
@@ -86,6 +98,18 @@ const drawHeatMap = (data) => {
         .attr('y', 10)
         .attr('dy', 5)
         .text(String)
+    
+    console.log(y(monthNames[0]))
+    //data points
+    chart.selectAll('.tile')
+        .data(points).enter()
+        .append('rect')
+        .attr('class', 'tile')
+        .attr('x', d=>x(new Date(d.year, 0)))
+        .attr('y', d=>y(monthNames[d.month]))
+        .style('fill', d=>z(d.variance + baseTemp))
+        .attr('width', boxWidth)
+        .attr('height', boxHeight)
 }
 
 const ineterpolateBuRd = t => {
